@@ -1,0 +1,6 @@
+@Polyci.Implementation_HostAddress = http://localhost:5069
+
+GET {{Polyci.Implementation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
