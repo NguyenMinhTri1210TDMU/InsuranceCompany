@@ -10,7 +10,8 @@
         <PackageReference Include="DynamicExpresso.Core" Version="2.16.1" />
         <PackageReference Include="GlobalExceptionHandler" Version="4.0.2" />
         <PackageReference Include="Marten" Version="7.19.1" />
-        <PackageReference Include="MediatR" Version="12.3.0" />
+        <PackageReference Include="MediatR" Version="14.1.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
         <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
         <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
