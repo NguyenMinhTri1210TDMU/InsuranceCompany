@@ -5,8 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Marten" Version="8.28.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
         <PackageReference Include="Steeltoe.Discovery.ClientCore" Version="3.2.7" />
         <PackageReference Include="Steeltoe.Discovery.Eureka" Version="3.2.7" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.0" />

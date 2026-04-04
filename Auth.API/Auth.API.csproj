@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
   </ItemGroup>
 
 </Project>

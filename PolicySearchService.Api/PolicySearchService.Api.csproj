@@ -7,6 +7,7 @@
     <ItemGroup>
         <PackageReference Include="MediatR" Version="12.3.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
     </ItemGroup>
 
 </Project>

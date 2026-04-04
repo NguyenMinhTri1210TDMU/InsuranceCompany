@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
     </ItemGroup>
 
 </Project>
