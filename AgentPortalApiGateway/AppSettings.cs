@@ -1,4 +1,4 @@
-namespace AgentPortalApiGateway;
+﻿namespace AgentPortalApiGateway;
 
 public class AppSettings
 {

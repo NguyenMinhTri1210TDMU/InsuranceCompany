@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PolicyService.DataAccess.NHibernate;
-using PolicyService.Messaging.RabbitMq;
 using PolicyService.RestClients;
 using Steeltoe.Discovery.Client;
+using RawRabbit;
+using RawRabbit.Configuration;
+using RawRabbit.Instantiation;
 
 namespace PolicyService;
 
@@ -19,34 +21,61 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        // ====================== EUREKA ======================
         services.AddDiscoveryClient(Configuration);
-        services.AddMvc()
+
+        // ====================== MVC ======================
+        services.AddControllers()
             .AddNewtonsoftJson();
-        services.AddMediatR(opts => opts.RegisterServicesFromAssemblyContaining<Startup>());
+
+        // ====================== MEDIATR ======================
+        services.AddMediatR(opts =>
+            opts.RegisterServicesFromAssemblyContaining<Startup>());
+
+        // ====================== REST CLIENT ======================
         services.AddPricingRestClient();
-        services.AddNHibernate(Configuration.GetConnectionString("DefaultConnection"));
-        services.AddRabbitListeners();
+
+        // ====================== NHIBERNATE ======================
+        services.AddNHibernate(
+            Configuration.GetConnectionString("DefaultConnection"));
+
+        
+
+
+
+        // ====================== SWAGGER ======================
         services.AddSwaggerGen();
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app,
+        IWebHostEnvironment env)
     {
         app.UseExceptionHandler("/error");
 
-        if (!env.IsDevelopment()) app.UseHsts();
-        
         if (env.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
+
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        else
+        {
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
 
         app.UseRouting();
-        app.UseHttpsRedirection();
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+
+        // ====================== EUREKA ======================
+        app.UseDiscoveryClient();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

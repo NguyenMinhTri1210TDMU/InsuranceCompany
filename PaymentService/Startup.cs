@@ -16,6 +16,10 @@ using PaymentService.Jobs;
 using PaymentService.Messaging.RabbitMq;
 using PolicyService.Api.Events;
 
+// Thêm 2 using này
+using Steeltoe.Discovery.Client;
+using Steeltoe.Discovery.Eureka;
+
 namespace PaymentService;
 
 public class Startup
@@ -27,7 +31,6 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddMvc()
@@ -41,15 +44,19 @@ public class Startup
         services.AddRabbitListeners();
         services.AddBackgroundJobs(Configuration.GetSection("BackgroundJobs").Get<BackgroundJobsConfig>());
         services.AddSwaggerGen();
+
+        // ==================== THÊM DÒNG NÀY ĐỂ ĐĂNG KÝ EUREKA ====================
+        services.AddDiscoveryClient(Configuration);   // Hoặc: services.AddEurekaDiscoveryClient();
+        // =====================================================================
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
         app.UseGlobalExceptionHandler(cfg => cfg.MapExceptions());
+
         if (!env.IsDevelopment()) app.UseHsts();
-        
+
         if (env.IsDevelopment())
         {
             app.UseSwagger();
@@ -60,6 +67,11 @@ public class Startup
         app.UseInitializer();
         app.UseRabbitListeners(new List<Type> { typeof(PolicyCreated), typeof(PolicyTerminated) });
         app.UseBackgroundJobs();
+
+        // ==================== THÊM DÒNG NÀY ĐỂ KÍCH HOẠT EUREKA ====================
+        app.UseDiscoveryClient();
+        // =====================================================================
+
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

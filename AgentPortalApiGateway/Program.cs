@@ -1,42 +1,38 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Eureka;
-using Ocelot.Cache.CacheManager;
+
+namespace AgentPortalApiGateway;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        BuildWebHost(args).Run();
-    }
+        var builder = WebApplication.CreateBuilder(args);
 
-    public static IWebHost BuildWebHost(string[] args)
-    {
-        return WebHost.CreateDefaultBuilder(args)
-            .UseUrls("http://localhost:8099")
-            .ConfigureAppConfiguration((hostingContext, config) =>
-            {
-                config
-                    .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
-                    .AddJsonFile("appsettings.json", true, true)
-                    .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", true, true)
-                    .AddJsonFile("ocelot.json", false, false)
-                    .AddEnvironmentVariables();
-            })
-            .ConfigureServices(s =>
-            {
-                s.AddOcelot()
-                 .AddEureka()
-                 .AddCacheManager(x => x.WithDictionaryHandle());
-            })
-            .Configure(a =>
-            {
-                a.UseOcelot().Wait();
-            })
-            .Build();
+        // ====================== CẤU HÌNH ======================
+        builder.Configuration
+            .SetBasePath(builder.Environment.ContentRootPath)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("ocelot.json", optional: false, reloadOnChange: false)
+            .AddEnvironmentVariables();
+        // =====================================================
+
+        // ====================== OCELOT + EUREKA ======================
+        builder.Services.AddOcelot()
+                        .AddEureka()
+                        .AddCacheManager(x => x.WithDictionaryHandle());
+        // ===========================================================
+
+        var app = builder.Build();
+
+        // Không dùng Authentication và Authorization nữa
+        app.UseOcelot().Wait();
+
+        app.Run();
     }
 }

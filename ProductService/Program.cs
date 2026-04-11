@@ -7,7 +7,6 @@ using Steeltoe.Discovery.Client;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services
     .AddControllers()
     .AddNewtonsoftJson(options =>
@@ -15,11 +14,15 @@ builder.Services
         options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
     });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ==================== EUREKA - SERVICE DISCOVERY ====================
 builder.Services.AddDiscoveryClient(builder.Configuration);
+// ==================================================================
+
 builder.Services.AddEFConfiguration(builder.Configuration);
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddProductDemoInitializer();
@@ -34,15 +37,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.UseInitializer();
+
+// ==================== EUREKA - KHỞI ĐỘNG REGISTRATION ====================
+// Dòng này rất quan trọng để service đăng ký với Eureka Server
+app.UseDiscoveryClient();
+// =====================================================================
 
 app.Run();
 
-public partial class Program
-{
-}
+public partial class Program { }

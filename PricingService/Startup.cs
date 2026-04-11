@@ -22,34 +22,55 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        // Eureka Service Discovery
         services.AddDiscoveryClient(Configuration);
-        services.AddControllers()
-            .AddNewtonsoftJson(opt => { opt.SerializerSettings.TypeNameHandling = TypeNameHandling.Auto; });
 
+        // Controllers + Newtonsoft.Json
+        services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore; // Tùy chọn tốt
+            });
+
+        // Marten (PostgreSQL Document DB)
         services.AddMarten(Configuration.GetConnectionString("DefaultConnection"));
+
+        // Initializer & MediatR
         services.AddPricingDemoInitializer();
         services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining<Program>());
+
+        // Logging Behavior (nếu bạn có pipeline behavior)
         services.AddLoggingBehavior();
+
+        // Swagger
         services.AddSwaggerGen();
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
 
+        // Global Exception Handler
         app.UseGlobalExceptionHandler(cfg => cfg.MapExceptions());
 
         if (env.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();     // Thêm để debug tốt hơn
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        else
+        {
+            app.UseHsts();
+        }
 
         app.UseInitializer();
+
+        // Eureka Discovery Client
+        app.UseDiscoveryClient();                // ← Rất quan trọng
 
         app.UseEndpoints(endpoints =>
         {

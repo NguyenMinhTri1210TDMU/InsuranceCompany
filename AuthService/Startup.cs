@@ -1,5 +1,4 @@
-﻿using System.Text;
-using AuthService.DataAccess;
+﻿using AuthService.DataAccess;
 using AuthService.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Steeltoe.Discovery.Client;        // ← Thêm using này
+using System;
+using System.Text;
 
 namespace AuthService;
 
@@ -20,70 +22,85 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
         var appSettingsSection = Configuration.GetSection("AppSettings");
         services.Configure<AppSettings>(appSettingsSection);
+
         var appSettings = appSettingsSection.Get<AppSettings>();
         var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
-        services.AddCors(opt => opt.AddPolicy("CorsPolicy",
+        // ====================== CORS ======================
+        services.AddCors(options => options.AddPolicy("CorsPolicy",
             builder =>
             {
                 builder
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials()
-                    .WithOrigins(appSettingsSection.Get<AppSettings>().AllowedAuthOrigins);
+                    .WithOrigins(appSettings.AllowedAuthOrigins ?? Array.Empty<string>());
             }));
 
-        services.AddMvc()
-            .AddNewtonsoftJson();
-        services.AddAuthentication(x =>
-        {
-            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-            .AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+        services.AddMvc().AddNewtonsoftJson();
 
+        // ====================== JWT AUTHENTICATION ======================
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        // ====================== EUREKA (Service Discovery) ======================
+        services.AddDiscoveryClient(Configuration);        // ← Quan trọng
+
+        // ====================== BUSINESS SERVICES ======================
         services.AddSingleton<Domain.AuthService>();
         services.AddSingleton<IInsuranceAgents, InsuranceAgentsInMemoryDb>();
+
         services.AddSwaggerGen();
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
+
         if (env.IsDevelopment())
             app.UseDeveloperExceptionPage();
-        else
-            app.UseHsts();
 
         if (env.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        else
+        {
+            app.UseHsts();
+        }
 
         app.UseCors("CorsPolicy");
-
         app.UseAuthentication();
         app.UseAuthorization();
-
         app.UseHttpsRedirection();
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+
+        // ====================== EUREKA ======================
+        app.UseDiscoveryClient();           // ← Rất quan trọng
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

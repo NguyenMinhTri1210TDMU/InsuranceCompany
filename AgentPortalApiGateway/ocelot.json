@@ -1,136 +1,79 @@
 {
   "Routes": [
     {
+      "UpstreamPathTemplate": "/api/Products/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/Products/{everything}",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Products/{everything}",
-      "ServiceName": "ProductService",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
+      "ServiceName": "product-service",
+      "UseServiceDiscovery": true,
       "FileCacheOptions": {
         "TtlSeconds": 15
-      },
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
       }
     },
     {
+      "UpstreamPathTemplate": "/api/Products",
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/Products",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Products",
-      "ServiceName": "ProductService",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
+      "ServiceName": "product-service",
+      "UseServiceDiscovery": true,
       "FileCacheOptions": {
         "TtlSeconds": 15
-      },
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
       }
     },
     {
+      "UpstreamPathTemplate": "/api/Dashboard/{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/Dashboard/{everything}",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Dashboard/{everything}",
-      "ServiceName": "DashboardService",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
+      "ServiceName": "dashboard-service",
+      "UseServiceDiscovery": true,
       "FileCacheOptions": {
         "TtlSeconds": 15
-      },
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
       }
     },
     {
+      "UpstreamPathTemplate": "/api/Offers",
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/Offer",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Offers",
-      "ServiceName": "PolicyService",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
-      },
+      "ServiceName": "policy-service",
+      "UseServiceDiscovery": true,
       "AddHeadersToRequest": {
         "AgentLogin": "Claims[http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier] > value[0] > |"
       }
     },
     {
+      "UpstreamPathTemplate": "/api/Policies",
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/Policy",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Policies",
-      "ServiceName": "PolicyService",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
-      }
+      "ServiceName": "policy-service",
+      "UseServiceDiscovery": true
     },
     {
+      "UpstreamPathTemplate": "/api/Policies/{number}",
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/Policy/{number}",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/Policies/{number}",
-      "ServiceName": "PolicyService",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
+      "ServiceName": "policy-service",
+      "UseServiceDiscovery": true,
       "FileCacheOptions": {
         "TtlSeconds": 15
-      },
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
       }
     },
     {
+      "UpstreamPathTemplate": "/api/PolicySearch",
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/PolicySearch",
       "DownstreamScheme": "http",
-      "UpstreamPathTemplate": "/api/PolicySearch",
-      "ServiceName": "PolicySearchService",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiSecurity",
-        "AllowedScopes": []
-      },
-      "RouteClaimsRequirement": {
-        "userType": "SALESMAN"
-      }
+      "ServiceName": "policysearch-service",
+      "UseServiceDiscovery": true
     }
   ],
   "GlobalConfiguration": {
     "RequestIdKey": "OcRequestId",
-    "AdministrationPath": "/administration",
     "UseServiceDiscovery": true,
     "ServiceDiscoveryProvider": {
       "Type": "Eureka",

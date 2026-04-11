@@ -24,11 +24,15 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
 
         <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
+
+        <PackageReference Include="Steeltoe.Discovery.ClientCore" Version="3.2.7" />
         <PackageReference Include="Steeltoe.Discovery.Eureka" Version="3.2.7" />
 
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    </ItemGroup>
+		
+
+	</ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ProductService.Api\ProductService.Api.csproj" />

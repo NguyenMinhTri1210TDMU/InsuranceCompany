@@ -21,35 +21,54 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        // Service Discovery (Eureka)
         services.AddDiscoveryClient(Configuration);
+
         services.AddMvc()
             .AddNewtonsoftJson();
+
         services.AddMediatR(opts => opts.RegisterServicesFromAssemblyContaining<Startup>());
+
+        // ElasticSearch
         services.AddElasticSearch(Configuration.GetConnectionString("ElasticSearchConnection"));
+
+        // RabbitMQ Listeners
         services.AddRabbitListeners();
+
         services.AddSwaggerGen();
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        app.UseRouting();
-        if (env.IsDevelopment())
-            app.UseDeveloperExceptionPage();
-        else
-            app.UseHsts();
-
         if (env.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        
+        else
+        {
+            app.UseHsts();
+        }
+
         app.UseHttpsRedirection();
-        app.UseRabbitListeners(new List<Type> { typeof(PolicyCreated) });
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+        app.UseRouting();
+
+        // Quan trọng: Phải có dòng này để đăng ký với Eureka
+        app.UseDiscoveryClient();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+
+        // RabbitMQ Listeners
+        app.UseRabbitListeners(new List<Type>
+        {
+            typeof(PolicyCreated) 
+            // Thêm các event khác nếu cần sau này
+        });
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using DashboardService.DataAccess.Elastic;
 using DashboardService.Domain;
@@ -23,39 +23,52 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        // Service Discovery (Eureka)
         services.AddDiscoveryClient(Configuration);
+
         services.AddMvc()
             .AddNewtonsoftJson();
+
         services.AddMediatR(opts => opts.RegisterServicesFromAssemblyContaining<Startup>());
+
+        // ElasticSearch
         services.AddElasticSearch(Configuration.GetConnectionString("ElasticSearchConnection"));
         services.AddSingleton<IPolicyRepository, ElasticPolicyRepository>();
+
+        // RabbitMQ Listeners
         services.AddRabbitListeners(Configuration.GetSection("RabbitMqOptions").Get<RabbitMqOptions>());
+
+        // Initial Data
         services.AddInitialSalesData();
+
         services.AddSwaggerGen();
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
-        
         if (env.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
         app.UseHttpsRedirection();
-
         app.UseRouting();
-
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
 
-        app.UseRabbitListeners(new List<Type> { typeof(PolicyCreated) });
+        // RabbitMQ Listeners
+        app.UseRabbitListeners(new List<Type>
+        {
+            typeof(PolicyCreated)
+            // Thêm các event khác nếu cần: typeof(OtherEvent), ...
+        });
     }
 }

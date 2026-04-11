@@ -8,6 +8,8 @@
         <PackageReference Include="FluentValidation" Version="11.9.2" />
         <PackageReference Include="MediatR" Version="12.3.0" />
         <PackageReference Include="Steeltoe.Discovery.ClientBase" Version="3.2.7" />
+		<PackageReference Include="RawRabbit.DependencyInjection.ServiceCollection" Version="2.0.0-rc5" />
+		<PackageReference Include="RawRabbit.Operations.Tools" Version="2.0.0-rc5" />
     </ItemGroup>
 
 </Project>
